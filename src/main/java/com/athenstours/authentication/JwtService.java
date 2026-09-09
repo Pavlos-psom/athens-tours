@@ -27,8 +27,8 @@ public class JwtService {
         var claims = new HashMap<String, Object>();
         claims.put("role", role);
         return Jwts.builder()
-                .setIssuer("https://athens-tours.local")
                 .setClaims(claims)
+                .setIssuer("https://athens-tours.local")
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
