@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,13 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
+
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public void handleAccessDenied(AccessDeniedException e) throws AccessDeniedException {
+        throw e;
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFound(EntityNotFoundException e) {

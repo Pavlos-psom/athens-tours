@@ -1,17 +1,14 @@
 package com.athenstours.security;
 
 import com.athenstours.authentication.JwtService;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +21,7 @@ import java.io.IOException;
 /** Reads "Authorization: Bearer <jwt>", validates it, and populates the SecurityContext. */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -31,38 +29,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                     @NonNull HttpServletResponse response,
-                                     @NonNull FilterChain filterChain)
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7).trim();
+            try {
+                String username = jwtService.extractSubject(jwt);
 
-        String jwt = authHeader.substring(7).trim();
-        try {
-            String username = jwtService.extractSubject(jwt);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (!jwtService.isTokenValid(jwt, userDetails)) {
-                    throw new BadCredentialsException("Invalid token");
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } catch (JwtException | IllegalArgumentException e) {
+                // Malformed, invalid-signature or expired token: don't authenticate, but let the
+                // request continue as anonymous. authorizeHttpRequests decides what happens next -
+                // permitAll endpoints still work, protected ones get a clean 401 from
+                // ExceptionTranslationFilter / CustomAuthenticationEntryPoint, the normal way.
+                log.debug("Ignoring invalid JWT on {}: {}", request.getRequestURI(), e.getMessage());
             }
-            filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException e) {
-            throw new CredentialsExpiredException("Expired token");
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new BadCredentialsException("Invalid token");
-        } catch (Exception e) {
-            throw new AuthenticationServiceException("Authentication failed");
         }
+
+        filterChain.doFilter(request, response);
     }
 }

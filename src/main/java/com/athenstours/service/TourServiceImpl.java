@@ -60,14 +60,14 @@ public class TourServiceImpl implements ITourService {
 
     @Override
     public List<TourReadOnlyDTO> getAllTours() {
-        return tourRepository.findAll().stream()
+        return tourRepository.findAllByDeletedFalse().stream()
                 .map(tourMapper::mapToTourReadOnlyDTO)
                 .toList();
     }
 
     @Override
     public List<TourReadOnlyDTO> getToursByCategory(Long categoryId) {
-        return tourRepository.findByCategoryId(categoryId).stream()
+        return tourRepository.findByCategoryIdAndDeletedFalse(categoryId).stream()
                 .map(tourMapper::mapToTourReadOnlyDTO)
                 .toList();
     }
@@ -79,7 +79,7 @@ public class TourServiceImpl implements ITourService {
         } catch (IllegalArgumentException e) {
             throw new EntityNotFoundException("Tour", "Tour '" + uuid + "' not found");
         }
-        return tourRepository.findByUuid(parsed)
+        return tourRepository.findByUuidAndDeletedFalse(parsed)
                 .orElseThrow(() -> new EntityNotFoundException("Tour", "Tour '" + uuid + "' not found"));
     }
 

@@ -9,7 +9,9 @@ import java.util.UUID;
 
 public interface TourRepository extends JpaRepository<Tour, Long> {
 
-    Optional<Tour> findByUuid(UUID uuid);
+    Optional<Tour> findByUuidAndDeletedFalse(UUID uuid);
 
-    List<Tour> findByCategoryId(Long categoryId);
+    List<Tour> findByCategoryIdAndDeletedFalse(Long categoryId);
+
+    List<Tour> findAllByDeletedFalse();
 }
