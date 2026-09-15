@@ -38,20 +38,20 @@ class TourRepositoryTest {
 
     @Test
     void findByUuidPositive() {
-        Optional<Tour> found = tourRepository.findByUuid(existingTour.getUuid());
+        Optional<Tour> found = tourRepository.findByUuidAndDeletedFalse(existingTour.getUuid());
         assertTrue(found.isPresent());
         assertEquals(existingTour.getId(), found.get().getId());
     }
 
     @Test
     void findByUuidNegative() {
-        Optional<Tour> found = tourRepository.findByUuid(UUID.randomUUID());
+        Optional<Tour> found = tourRepository.findByUuidAndDeletedFalse(UUID.randomUUID());
         assertTrue(found.isEmpty());
     }
 
     @Test
     void findByCategoryIdReturnsMatchingTours() {
-        List<Tour> found = tourRepository.findByCategoryId(category.getId());
+        List<Tour> found = tourRepository.findByCategoryIdAndDeletedFalse(category.getId());
         assertEquals(1, found.size());
         assertEquals(existingTour.getId(), found.get(0).getId());
     }
