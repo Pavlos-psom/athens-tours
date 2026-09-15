@@ -57,6 +57,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/tour-guides/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
