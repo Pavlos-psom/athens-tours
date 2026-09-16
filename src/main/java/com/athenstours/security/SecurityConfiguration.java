@@ -58,6 +58,8 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tour-guides/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/tour-schedules/my-schedule").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/tour-schedules/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
