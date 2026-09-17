@@ -58,7 +58,7 @@ public class TourGuide extends AbstractEntity {
     public TourGuide(String phone, String bio, Set<String> languages, User user) {
         this.phone = phone;
         this.bio = bio;
-        this.languages = languages != null ? languages : new HashSet<>();
+        this.languages = languages != null ? new HashSet<>(languages) : new HashSet<>();
         this.user = user;
     }
 

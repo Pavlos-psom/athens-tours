@@ -32,7 +32,7 @@ class TourGuideRepositoryTest {
 
     @BeforeEach
     void setup() {
-        Role guideRole = new Role("TEST_GUIDE_ROLE_" + UUID.randomUUID());
+        Role guideRole = new Role("TEST_ROLE_" + UUID.randomUUID());
         roleRepository.save(guideRole);
 
         User user = new User("test_guide_" + UUID.randomUUID(), "encoded-password", guideRole);
