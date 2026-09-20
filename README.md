@@ -1,90 +1,151 @@
 # Athens Tours
 
-REST API για γραφείο ξεναγήσεων στην Αθήνα: Spring Boot + MySQL, layered architecture (Repository /
-Service / Controller), JWT authentication/authorization, domain model με Tour / TourGuide /
-TourSchedule / Booking.
+REST API for an Athens sightseeing tour agency — browsing tours, tour guides and
+schedules, and booking seats on them. Built as the final project for the ΟΠΑ
+Coding Factory Java/Spring track.
 
-Το πλήρες ER diagram του domain model είναι εδώ: *(link προς το artifact)*.
+## Tech stack
 
-## Stack
+- Java 21
+- Spring Boot 3.5.10 (Web, Data JPA, Security, Validation)
+- Spring Security 6 — stateless JWT authentication, role/capability-based authorization
+- Hibernate / Spring Data JPA
+- Flyway — versioned DB migrations, applied automatically on startup
+- MySQL 8.0 (runs in Docker)
+- springdoc-openapi 2.9.1 — Swagger / OpenAPI 3 documentation
+- Lombok
+- JUnit 5, Mockito, AssertJ — unit tests
+- Gradle (wrapper included, no local Gradle install needed)
 
-- Java 21, Spring Boot 3.5, Gradle
-- Spring Web, Spring Data JPA, Spring Security, Bean Validation
-- MySQL 8 (μέσω Docker), Flyway migrations
-- JWT (jjwt), springdoc-openapi (Swagger UI)
-- JUnit 5, AssertJ, H2 (για tests)
+## Architecture
 
-## Δομή packages
+Layered backend: `api` (REST controllers) → `service` (business logic) →
+`repository` (Spring Data JPA) → `model` (JPA entities). DTOs at the API
+boundary via `dto`/`mapper`, centralized error handling in `core`.
+
+Roles: `ADMIN`, `GUIDE`, `CUSTOMER`, each with a set of capabilities
+(`MANAGE_TOURS`, `CREATE_BOOKING`, `VIEW_OWN_BOOKINGS`, etc.) enforced with
+`@PreAuthorize` on individual endpoints. Soft-delete is used throughout
+(`deleted`/`deletedAt` on every entity) instead of hard deletes.
+
+## Prerequisites
+
+- JDK 21
+- Docker Desktop (for the MySQL database)
+- Git
+
+## 1. Clone the repository
 
 ```
-com.athenstours
- ├── model/              JPA entities (+ model/static_data για lookup entities π.χ. Category)
- ├── repository/         Spring Data JPA repositories
- ├── service/            Business logic, interface + impl ανά entity
- ├── mapper/             Entity <-> DTO conversion
- ├── dto/                Request/response records (InsertDTO / UpdateDTO / ReadOnlyDTO)
- ├── api/                REST controllers
- ├── security/           JWT filter, SecurityConfiguration, entry point / denied handler
- └── core/
-      ├── exceptions/    Custom exceptions + Global Exception Handler
-      ├── enums/         Enums (π.χ. BookingStatus)
-      └── filters/       Dynamic query filter DTOs
+git clone <this-repo-url>
+cd athens-tours
 ```
 
-Resources: `src/main/resources/db/migration` — Flyway scripts (V1__..., V2__..., ...).
+## 2. Start the database
 
-## Πώς τρέχει τοπικά
+The app expects a MySQL 8.0 container named `athens-tours-mysql`, exposed on
+host port **3307** (so it doesn't clash with a local MySQL install on the
+default 3306):
 
-### 1. Βάση δεδομένων (Docker)
-
-```bash
-docker run --name athens-tours-mysql \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=athens_tours_dev \
-  -e MYSQL_USER=tours_user \
-  -e MYSQL_PASSWORD=tours_password \
-  -p 3306:3306 \
-  -d mysql:8.0
+```
+docker run -d --name athens-tours-mysql ^
+  -p 3307:3306 ^
+  -e MYSQL_ROOT_PASSWORD=root ^
+  -e MYSQL_DATABASE=athens_tours_dev ^
+  -e MYSQL_USER=tours_user ^
+  -e MYSQL_PASSWORD=tours_password ^
+  mysql:8.0
 ```
 
-Αν προτιμάς να μη χρησιμοποιήσεις Docker, φτιάξε τη βάση χειροκίνητα (π.χ. με MySQL Workbench) με
-τα ίδια στοιχεία, ή άλλαξε τα `MYSQL_*` env vars / το `application-dev.properties`.
+(`^` is the Windows `cmd.exe` line-continuation character — on macOS/Linux
+replace it with `\`, or just put the whole command on one line.)
 
-### 2. Άνοιγμα στο IntelliJ
+Give it a few seconds to finish initializing before starting the app. You can
+check it's healthy with:
 
-- File → Open → επίλεξε τον φάκελο `athens-tours`.
-- Άφησε το IntelliJ να κάνει sync το Gradle project (θα κατεβάσει μόνο του τα dependencies).
-- Βεβαιώσου ότι το Project SDK είναι Java 21 (File → Project Structure).
-
-### 3. Build & Run
-
-```bash
-./gradlew clean build
-./gradlew bootRun
+```
+docker ps
 ```
 
-Ή απλά πάτα Run πάνω στο `AthensToursApplication`.
+Flyway takes care of the schema and seed data (roles, capabilities, tour
+categories, etc.) automatically the first time the application starts —
+there's nothing to run manually against the database.
 
-> Σημείωση: αυτό το project δεν έχει ακόμα Gradle wrapper jar (χρειάζεται δίκτυο για να κατέβει).
-> Το IntelliJ το φτιάχνει μόνο του με sync· αν θες να τρέξεις `./gradlew` από τερματικό πριν το
-> ανοίξεις στο IntelliJ, τρέξε πρώτα `gradle wrapper` (αν έχεις τοπικά εγκατεστημένο Gradle).
+## 3. Run the application
 
-### 4. Έλεγχος
+The app reads the database port from an environment variable, `MYSQL_PORT`,
+which **must** be set to `3307` to match the Docker port mapping above (it
+defaults to `3306`, MySQL's standard port, which is *not* what the container
+is published on here).
 
-- Health check: `GET http://localhost:8080/actuator/health`
-- Swagger UI (μόλις προστεθούν endpoints): `http://localhost:8080/swagger-ui.html`
+**From IntelliJ:** open the `AthensToursApplication` run configuration →
+Environment variables → `MYSQL_PORT=3307`, then just Run.
 
-## Σειρά υλοποίησης
+**From the command line:**
 
-1. `Role`, `Capability`, `roles_capabilities` — auth lookup πίνακες + Flyway seed data
-2. `User` + Spring Security / JWT
-3. `Category`, `Tour`
-4. `TourGuide`
-5. `TourSchedule`
-6. `Booking`
-7. JUnit tests ανά layer, entity-by-entity
+```
+set MYSQL_PORT=3307
+gradlew.bat bootRun
+```
 
-## Build & deploy (θα συμπληρωθεί)
+(macOS/Linux: `MYSQL_PORT=3307 ./gradlew bootRun`)
 
-Αυτό το section θα ενημερώνεται σταδιακά ώστε στο τέλος να περιγράφει αναλυτικά build & deploy,
-όπως ζητά η εκφώνηση.
+The app starts on **http://localhost:8080**.
+
+On first startup, a default admin account is seeded automatically if one
+doesn't already exist:
+
+```
+username: admin
+password: Passw0rd!
+```
+
+(Local development only — this is not meant to ship to a real deployment as-is.)
+
+## API documentation (Swagger)
+
+Once the app is running:
+
+- Swagger UI: http://localhost:8080/swagger-ui/index.html
+- Raw OpenAPI spec: http://localhost:8080/v3/api-docs
+
+To call protected endpoints from Swagger UI: run `POST /api/v1/auth/authenticate`
+with a valid username/password, copy the `token` from the response, click
+**Authorize** (top right) and paste it in (no need to type `Bearer ` — Swagger
+adds that itself).
+
+## Postman collection
+
+A Postman collection (`athens-tours.postman_collection.json`) covering the
+full API — auth, tours, guides, schedules, bookings, and both the admin and
+customer/guide authorization boundaries — is included in the repository.
+Import it into Postman, set the `baseUrl` variable to `http://localhost:8080`,
+and either run individual requests or the whole thing through the Collection
+Runner (the requests are chained via collection variables — captured tokens
+and created-entity UUIDs get reused by later requests, so run them in order).
+
+## Running the tests
+
+```
+gradlew.bat test
+```
+
+(macOS/Linux: `./gradlew test`)
+
+Covers the service layer with Mockito-based unit tests (business rules such
+as booking capacity enforcement and booking ownership checks).
+
+## Frontend
+
+A React frontend consuming this API is in progress and will live in a
+separate `frontend/` directory. The backend's CORS configuration already
+allows the typical local dev server origins (`http://localhost:3000` and
+`http://localhost:5173`).
+
+## Configuration reference
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `MYSQL_PORT` | `3306` | Port the app connects to MySQL on — set to `3307` for the Docker setup above |
+| `SERVER_PORT` | `8080` | Port the application itself listens on |
+| `BCRYPT_STRENGTH` | `12` | Password hashing cost factor |

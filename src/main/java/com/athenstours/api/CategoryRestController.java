@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-
+@Tag(name = "Categories", description = "Browse tour categories")
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
