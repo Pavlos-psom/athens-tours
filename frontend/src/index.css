@@ -7,9 +7,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --color-aegean: #1e3a5f;
-    --color-aegean-light: #2f5d8f;
-    --color-aegean-dark: #12233b;
+    --color-aegean: #0e4a7a;
+    --color-aegean-light: #1b6aa5;
+    --color-aegean-dark: #082f4f;
 }
 
 :root {
@@ -19,8 +19,8 @@
     --card-foreground: oklch(0.148 0.004 228.8);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.148 0.004 228.8);
-    --primary: oklch(0.553 0.195 38.402);
-    --primary-foreground: oklch(0.98 0.016 73.684);
+    --primary: #f59e0b;
+    --primary-foreground: #1f2937;
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.963 0.002 197.1);

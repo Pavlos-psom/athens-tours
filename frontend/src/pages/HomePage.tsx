@@ -9,12 +9,14 @@ const HomePage = () => {
 
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl bg-aegean px-8 py-16 text-center text-white">
-        <h1 className="text-4xl font-bold md:text-5xl">Discover Athens with local guides</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-white/80">
+      <section className="rounded-3xl bg-aegean bg-cover bg-center px-8 py-24 text-center text-white"
+style={{backgroundImage: "linear-gradient(rgba(8,47,79,0.45), rgba(8,47,79,0.45)), url('/images/athens.png')"}}
+>
+        <h1 className="text-4xl font-bold drop-shadow-lg md:text-5xl">Discover Athens with local guides</h1>
+        <p className="mx-auto mt-4 max-w-3xl text-xl font-semibold text-white drop-shadow-md md:text-2xl">
           From the Acropolis to hidden neighbourhoods – browse our tours, pick a date and book your spot in seconds.
         </p>
-        <Button asChild size="lg" variant="secondary" className="mt-8">
+        <Button asChild size="lg" className="mt-8">
           <Link to="/tours">Browse tours</Link>
         </Button>
       </section>
