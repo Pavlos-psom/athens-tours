@@ -1,5 +1,6 @@
 package com.athenstours.api;
 
+import com.athenstours.core.exceptions.AlreadyBookedException;
 import com.athenstours.core.exceptions.EntityNotFoundException;
 import com.athenstours.core.exceptions.ScheduleFullException;
 import com.athenstours.dto.BookingInsertDTO;
@@ -42,7 +43,7 @@ public class BookingRestController {
     @PreAuthorize("hasAuthority('CREATE_BOOKING')")
     public ResponseEntity<BookingReadOnlyDTO> createBooking(@Valid @RequestBody BookingInsertDTO dto,
                                                               @AuthenticationPrincipal User currentUser)
-            throws EntityNotFoundException, ScheduleFullException {
+            throws EntityNotFoundException, ScheduleFullException, AlreadyBookedException, AlreadyBookedException {
         BookingReadOnlyDTO created = bookingService.createBooking(dto, currentUser.getUsername());
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }

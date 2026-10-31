@@ -2,6 +2,7 @@ package com.athenstours.service;
 
 import com.athenstours.core.exceptions.EntityNotFoundException;
 import com.athenstours.core.exceptions.ScheduleFullException;
+import com.athenstours.core.exceptions.AlreadyBookedException;
 import com.athenstours.dto.BookingInsertDTO;
 import com.athenstours.dto.BookingReadOnlyDTO;
 import com.athenstours.mapper.BookingMapper;
@@ -30,13 +31,15 @@ public class BookingServiceImpl implements IBookingService {
     private final BookingMapper bookingMapper;
 
     @Override
-    @Transactional(rollbackFor = {EntityNotFoundException.class, ScheduleFullException.class})
+    @Transactional(rollbackFor = {EntityNotFoundException.class, ScheduleFullException.class, AlreadyBookedException.class})
     public BookingReadOnlyDTO createBooking(BookingInsertDTO dto, String username)
-            throws EntityNotFoundException, ScheduleFullException {
+            throws EntityNotFoundException, ScheduleFullException, AlreadyBookedException {
 
         TourSchedule schedule = findScheduleOrThrow(dto.scheduleUuid());
         User customer = findCustomerOrThrow(username);
-
+        if (bookingRepository.existsByCustomerUsernameAndTourScheduleAndDeletedFalse(username, schedule)) {
+            throw new AlreadyBookedException("You have already booked this tour date");
+        }
         long activeBookings = bookingRepository.countByTourScheduleAndDeletedFalse(schedule);
         if (activeBookings >= schedule.getCapacity()) {
             throw new ScheduleFullException(

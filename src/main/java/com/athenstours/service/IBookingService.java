@@ -2,6 +2,7 @@ package com.athenstours.service;
 
 import com.athenstours.core.exceptions.EntityNotFoundException;
 import com.athenstours.core.exceptions.ScheduleFullException;
+import com.athenstours.core.exceptions.AlreadyBookedException;
 import com.athenstours.dto.BookingInsertDTO;
 import com.athenstours.dto.BookingReadOnlyDTO;
 
@@ -11,7 +12,7 @@ public interface IBookingService {
 
     /** CREATE_BOOKING: the authenticated customer books one seat. */
     BookingReadOnlyDTO createBooking(BookingInsertDTO dto, String username)
-            throws EntityNotFoundException, ScheduleFullException;
+            throws EntityNotFoundException, ScheduleFullException, AlreadyBookedException;
 
     /** VIEW_OWN_BOOKINGS: cancel one of the caller's own bookings (soft-delete). */
     void cancelBooking(String uuid, String username) throws EntityNotFoundException;

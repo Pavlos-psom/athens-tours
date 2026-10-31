@@ -19,4 +19,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Backs the capacity check in createBooking: how many active seats are already taken.
     long countByTourScheduleAndDeletedFalse(TourSchedule tourSchedule);
+    // Backs the duplicate-booking check: has this customer already got an active seat on this schedule?
+    boolean existsByCustomerUsernameAndTourScheduleAndDeletedFalse(String username, TourSchedule tourSchedule);
 }
