@@ -131,6 +131,15 @@
   body {
     @apply bg-background text-foreground;
     }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url('/images/athens_back.png') center / cover no-repeat;
+    opacity: 0.28;
+    }
   html {
     @apply font-sans;
     }

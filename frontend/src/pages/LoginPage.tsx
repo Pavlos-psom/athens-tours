@@ -17,6 +17,19 @@ const homeByRole: Record<Role, string> = {
   CUSTOMER: "/tours",
 }
 
+// Σε ποιον ρόλο ανήκει κάθε προστατευμένο κομμάτι της εφαρμογής (πρέπει να συμφωνεί με το App.tsx)
+const roleByPrefix: Record<string, Role> = {
+  "/admin": "ADMIN",
+  "/my-schedule": "GUIDE",
+  "/my-bookings": "CUSTOMER",
+}
+
+// true αν ο ρόλος επιτρέπεται στη διαδρομή (οι δημόσιες διαδρομές επιτρέπονται σε όλους)
+const canVisit = (path: string, role: Role) => {
+  const entry = Object.entries(roleByPrefix).find(([prefix]) => path.startsWith(prefix));
+  return !entry || entry[1] === role;
+}
+
 export default function LoginPage() {
   const {loginUser} = useAuth();
   const navigate = useNavigate();
@@ -35,7 +48,8 @@ export default function LoginPage() {
     try {
       const user = await loginUser(data);
       toast.success("Login successful");
-      navigate(from ?? (user ? homeByRole[user.role] : "/"), {replace: true});
+         const target = user && from && canVisit(from, user.role) ? from : user ? homeByRole[user.role] : "/";
+      navigate(target, {replace: true});
     } catch (error) {
       toast.error(getErrorMessage(error, "Login failed"));
     }

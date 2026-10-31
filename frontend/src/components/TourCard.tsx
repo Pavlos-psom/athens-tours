@@ -14,7 +14,7 @@ const TourCard = ({tour}: { tour: Tour }) => {
       </div>
       <CardContent className="space-y-2">
         <p className="line-clamp-3 text-muted-foreground">{tour.description || "No description."}</p>
-        <p>{formatDuration(tour.durationMinutes)}</p>
+             <p>Duration: {formatDuration(tour.durationMinutes)}</p>
       </CardContent>
       <CardFooter>
         <span className="text-lg font-semibold">{formatPrice(tour.price)}</span>

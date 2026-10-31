@@ -20,7 +20,7 @@ const HomePage = () => {
   return (
     <div className="space-y-10">
       <section
-        className="rounded-3xl bg-aegean bg-cover bg-center px-8 py-24 text-center text-white"
+        className="rounded-3xl bg-aegean bg-cover bg-center px-8 pt-38 pb-16 text-center text-white"
         style={{backgroundImage: "linear-gradient(rgba(8,47,79,0.45), rgba(8,47,79,0.45)), url('/images/athens.png')"}}
       >
         <h1 className="text-4xl font-bold drop-shadow-lg md:text-5xl">Discover Athens with local guides</h1>
