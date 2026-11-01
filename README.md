@@ -1,6 +1,6 @@
 # Athens Tours
 
-REST API for an Athens sightseeing tour agency — browsing tours, tour guides and
+Full-stack application (REST API + React frontend) for an Athens sightseeing tour agency — browsing tours, tour guides and
 schedules, and booking seats on them. Built as the final project for the ΟΠΑ
 Coding Factory Java/Spring track.
 
@@ -137,10 +137,36 @@ as booking capacity enforcement and booking ownership checks).
 
 ## Frontend
 
-A React frontend consuming this API is in progress and will live in a
-separate `frontend/` directory. The backend's CORS configuration already
-allows the typical local dev server origins (`http://localhost:3000` and
-`http://localhost:5173`).
+A React single-page application in the `frontend/` directory consumes this API.
+It supports four kinds of users:
+
+- **Visitors** browse tours, tour guides and available dates.
+- **Customers** register, log in, book a seat on a tour date and cancel their
+  bookings (My Bookings). A customer cannot hold two active bookings for the
+  same tour date.
+- **Guides** see their own schedule.
+- **Admins** manage tours, guides and schedules, and view all bookings.
+
+Tech: React 19, TypeScript, Vite, React Router, React Hook Form + Zod,
+Tailwind CSS v4, shadcn/ui.
+
+### Run the frontend
+
+Prerequisite: Node.js 20.19+ (or 22+). Start the backend first (see above),
+then in a second terminal:
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173**.
+
+The API URL defaults to `http://localhost:8080/api/v1`. To change it, copy
+`.env.example` to `.env` and edit `VITE_API_URL`.
+
+To create a production build: `npm run build`.
 
 ## Configuration reference
 
@@ -149,3 +175,7 @@ allows the typical local dev server origins (`http://localhost:3000` and
 | `MYSQL_PORT` | `3306` | Port the app connects to MySQL on — set to `3307` for the Docker setup above |
 | `SERVER_PORT` | `8080` | Port the application itself listens on |
 | `BCRYPT_STRENGTH` | `12` | Password hashing cost factor |
+| `MYSQL_HOST` | `localhost` | Database host |
+| `MYSQL_DB` | `athens_tours_dev` | Database name |
+| `MYSQL_USER` | `tours_user` | Database user |
+| `MYSQL_PASSWORD` | `tours_password` | Database password (local dev default) |

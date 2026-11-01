@@ -11,7 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
-
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,16 @@ public class ErrorHandler {
     public void handleAccessDenied(AccessDeniedException e) throws AccessDeniedException {
         throw e;
     }
-
+    // Wrong username/password (BadCredentialsException) is thrown by the AuthenticationManager inside
+    // AuthRestController - without this handler it falls through to the generic 500 handler below.
+    // The message is deliberately the same whether the username or the password was wrong.
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthentication(AuthenticationException e) {
+        log.warn("Authentication failed: {}", e.getMessage());
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("INVALID_CREDENTIALS", "Invalid username or password"),
+                HttpStatus.UNAUTHORIZED);
+    }
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFound(EntityNotFoundException e) {
         log.warn("Entity not found: {}", e.getMessage());
