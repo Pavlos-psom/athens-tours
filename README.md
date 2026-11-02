@@ -179,3 +179,4 @@ To create a production build: `npm run build`.
 | `MYSQL_DB` | `athens_tours_dev` | Database name |
 | `MYSQL_USER` | `tours_user` | Database user |
 | `MYSQL_PASSWORD` | `tours_password` | Database password (local dev default) |
+| `JWT_SECRET` | dev key | Base64 key used to sign JWTs. Override it outside local development |
