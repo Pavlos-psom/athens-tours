@@ -2,6 +2,7 @@ package com.athenstours.service;
 
 import com.athenstours.core.exceptions.EntityNotFoundException;
 import com.athenstours.core.exceptions.ScheduleFullException;
+import com.athenstours.core.exceptions.AlreadyBookedException;
 import com.athenstours.dto.BookingInsertDTO;
 import com.athenstours.dto.BookingReadOnlyDTO;
 import com.athenstours.mapper.BookingMapper;
@@ -90,7 +91,30 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBookingSucceedsWhenSeatIsAvailable() throws EntityNotFoundException, ScheduleFullException {
+    void createBookingThrowsAlreadyBookedExceptionWhenCustomerAlreadyBookedThisSchedule() {
+        String scheduleUuid = UUID.randomUUID().toString();
+        BookingInsertDTO dto = new BookingInsertDTO(scheduleUuid);
+
+        TourSchedule schedule = new TourSchedule();
+        schedule.setCapacity(2);
+        User customer = new User();
+
+        when(tourScheduleRepository.findByUuidAndDeletedFalse(UUID.fromString(scheduleUuid)))
+                .thenReturn(Optional.of(schedule));
+        when(userRepository.findByUsername("customer1"))
+                .thenReturn(Optional.of(customer));
+        when(bookingRepository.existsByCustomerUsernameAndTourScheduleAndDeletedFalse("customer1", schedule))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> bookingService.createBooking(dto, "customer1"))
+                .isInstanceOf(AlreadyBookedException.class);
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void createBookingSucceedsWhenSeatIsAvailable()
+            throws EntityNotFoundException, ScheduleFullException, AlreadyBookedException {
         String scheduleUuid = UUID.randomUUID().toString();
         BookingInsertDTO dto = new BookingInsertDTO(scheduleUuid);
 
