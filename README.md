@@ -28,6 +28,7 @@ Roles: `ADMIN`, `GUIDE`, `CUSTOMER`, each with a set of capabilities
 `@PreAuthorize` on individual endpoints. Soft-delete is used throughout
 (`deleted`/`deletedAt` on every entity) instead of hard deletes.
 
+The database schema is created by versioned Flyway migrations that mirror the JPA entities of the domain model.
 ## Prerequisites
 
 - JDK 21
@@ -37,7 +38,7 @@ Roles: `ADMIN`, `GUIDE`, `CUSTOMER`, each with a set of capabilities
 ## 1. Clone the repository
 
 ```
-git clone <this-repo-url>
+git clone https://github.com/Pavlos-psom/athens-tours.git
 cd athens-tours
 ```
 
@@ -172,7 +173,8 @@ gradlew.bat test
 (macOS/Linux: `./gradlew test`)
 
 Covers the service layer with Mockito-based unit tests (business rules such
-as booking capacity enforcement and booking ownership checks).
+as booking capacity enforcement, booking ownership checks and the rule that a
+customer cannot book the same tour date twice).
 
 ## Frontend
 
