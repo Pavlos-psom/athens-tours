@@ -124,6 +124,45 @@ and either run individual requests or the whole thing through the Collection
 Runner (the requests are chained via collection variables — captured tokens
 and created-entity UUIDs get reused by later requests, so run them in order).
 
+## Build and deploy
+
+### Backend
+
+Build an executable JAR (the tests run as part of the build):
+
+```
+gradlew.bat build
+```
+
+(macOS/Linux: `./gradlew build`)
+
+The JAR is created in `build/libs/` as `athens-tours-0.0.1-SNAPSHOT.jar`
+(ignore the `-plain.jar`). To run it, with the database from step 2 already
+up:
+
+```
+set MYSQL_PORT=3307
+java -jar build\libs\athens-tours-0.0.1-SNAPSHOT.jar
+```
+
+(macOS/Linux: `MYSQL_PORT=3307 java -jar build/libs/athens-tours-0.0.1-SNAPSHOT.jar`)
+
+The database connection and the JWT key can be overridden with the environment
+variables listed in the configuration table below, so the same JAR can be
+deployed to any environment without changing the code.
+
+### Frontend
+
+```
+cd frontend
+npm install
+npm run build
+```
+
+The production build is created in `frontend/dist/` as static files, which can
+be served by any web server (for example Nginx). Set `VITE_API_URL` before
+building so that the frontend points to the deployed backend.
+
 ## Running the tests
 
 ```
